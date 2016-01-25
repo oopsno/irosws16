@@ -1,12 +1,14 @@
 \section{Methods}
 
-Implementing above features requires a 
- 
+Implementing above features, the biggest problem is manitaining multiple active instance of a specified ROS Service at same time.
+
+That is, these instance are not \emph{ROS Nodes} in \emph{ROS Graph}, but \emph{Cells} in containers.
+
 \subsection{Overriding ROS Master API}
 How did I modified the original XML-RPC based protocol.
 
 \subsection{Distributing ROS Service using Docker}
-You can use an kind of technology to manage these containers.
+You can use any kind of technology to manage these containers.
 
 \subsection{Managing multiple Nodes with same name}
 \subsubsection{Mapping Container ID to host IP \& port}
