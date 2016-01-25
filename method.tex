@@ -12,6 +12,8 @@ You can use any kind of technology to manage these containers.
 
 \subsection{Managing multiple Nodes with same name}
 \subsubsection{Mapping Container ID to host IP \& port}
+While each independent ROS Service will listen on random port on it's initializing process, transcendental method would not works any way.
+
 Running a Key-Value storage engine (Radis for this case) to hold ports mapping status.
 
 \subsubsection{Load Balancing}
