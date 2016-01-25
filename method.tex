@@ -1,21 +1,24 @@
 \section{Methods}
-% no \IEEEPARstart
-This demo file is intended to serve as a ``starter file''
-for IEEE conference papers produced under \LaTeX\ using
-IEEEtran.cls version 1.8b and later.
-% You must have at least 2 lines in the paragraph with the drop letter
-% (should never be an issue)
-I wish you the best of success.
 
-\hfill mds
+Implementing above features requires a 
  
-\hfill August 26, 2015
+\subsection{Overriding ROS Master API}
+How did I modified the original XML-RPC based protocol.
 
-\subsection{Subsection Heading Here}
-Subsection text here.
+\subsection{Distributing ROS Service using Docker}
+You can use an kind of technology to manage these containers.
 
+\subsection{Managing multiple Nodes with same name}
+\subsubsection{Mapping Container ID to host IP \& port}
+Running a Key-Value storage engine (Radis for this case) to hold ports mapping status.
 
-\subsubsection{Subsubsection Heading Here}
-Subsubsection text here.
+\subsubsection{Load Balancing}
+Cannot findout real-time payload of a specified Node without modifying ROS client codes.
+
+\subsection{Supporting Fallback}
+Configuration on how does one node works. 
+
+\subsection{Supporting private Nodes}
+Running a variant of ROS Master on each client.
 
 
