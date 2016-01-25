@@ -12,9 +12,18 @@ You can use any kind of technology to manage these containers.
 
 \subsection{Managing multiple Nodes with same name}
 \subsubsection{Mapping Container ID to host IP \& port}
-While each independent ROS Service will listen on random port on it's initializing process, transcendental method would not works any way.
+While each independent ROS Service will listen on random port on it's initializing process, transcendental method would not works any way. 
 
-Running a Key-Value storage engine (Radis for this case) to hold ports mapping status.
+Current Docker releases has not included an introspect mechanism.
+
+Engage the access from inside the Container to host is not a secure practice.
+
+So we used a three-stage solution with a extra container running a Key-Value storage componment(Radis for this case).
+\begin{enumerate}
+    \item Register the mapped port to K-V storage right after container was created.
+    \item Expose port 30000 for each Cells' container
+    \item Redirect income requests from 30000 to listening port of the Service right after it's initialization
+\end{enumerate}
 
 \subsubsection{Load Balancing}
 Implementing load-balancing algorithms based on \emph{the real payload of each Cell} is overcomplicated.
