@@ -15,7 +15,9 @@ You can use any kind of technology to manage these containers.
 Running a Key-Value storage engine (Radis for this case) to hold ports mapping status.
 
 \subsubsection{Load Balancing}
-Cannot findout real-time payload of a specified Node without modifying ROS client codes.
+Implementing load-balancing algorithms based on \emph{the real payload of each Cell} is overcomplicated.
+
+To minimize the modification of original ROS, we decided to use the \emph{LRU} algorithm to detected which cell should be returned for current request, just like \emph{Nginx}'s default behaviour.
 
 \subsection{Supporting Fallback}
 Configuration on how does one node works. 
