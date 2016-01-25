@@ -33,6 +33,24 @@ To minimize the modification of original ROS, we decided to use the \emph{LRU} a
 \subsection{Supporting Fallback}
 Configuration on how does one node works. 
 
+\subsubsection{Configuration}
+
+
+\begin{itemize}
+    \item Local, using fallback 
+    \item Remote, 
+\end{itemize}
+
+\begin{itemize}
+    \item True, using fallback 
+    \item False, 
+    \item a non-empty list of Service names, recursively 
+\end{itemize}
+
+\subsubsection{Local Proxy}
+Using the same techique of creating \emph{Daemon}, we created a lightweight proxy of Illuminate, or ROS Master on client side, called \emph{Shadow}.
+
+
 \subsection{Supporting private Nodes}
 Running a variant of ROS Master on each client.
 
