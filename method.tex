@@ -12,7 +12,7 @@ You can use any kind of technology to manage these containers.
 
 \subsection{Managing multiple Nodes with same name}
 \subsubsection{Mapping Container ID to host IP \& port}
-While each independent ROS Service will listen on random port on it's initializing process, transcendental method would not works any way. 
+While each independent ROS Service will listen on random port on its initializing process, transcendental method would not works any way. 
 
 Current Docker releases has not included an introspect mechanism.
 
@@ -22,7 +22,7 @@ So we used a three-stage solution with a extra container running a Key-Value sto
 \begin{enumerate}
     \item Register the mapped port to K-V storage right after container was created.
     \item Expose port 30000 for each Cells' container
-    \item Redirect income requests from 30000 to listening port of the Service right after it's initialization
+    \item Redirect income requests from 30000 to listening port of the Service right after its initialization
 \end{enumerate}
 
 \subsubsection{Load Balancing}
@@ -34,7 +34,23 @@ To minimize the modification of original ROS, we decided to use the \emph{LRU} a
 Configuration on how does one node works. 
 
 \subsubsection{Configuration}
+To discrbe a Service's usage and its lookup behaviour in a client's perspective, we defined 3 properties, priority, fallback and recursive(see table \ref{table:srv-opt}).
 
+\begin{table}
+    \renewcommand{\arraystretch}{1.3}
+    \caption{Options to configure a ROS Service}
+    \label{table:srv-opt}
+    \centering
+    \begin{tabular}{rl}
+        \hline
+        \bfseries Name & \bfseries Possible values\\
+        \hline
+        priority  & True, False \\
+        fallback  & True, False, non-empty list of services \\
+        recursive & True, False \\
+        \hline
+    \end{tabular}
+\end{table} 
 
 \begin{itemize}
     \item Local, using fallback 
