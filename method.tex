@@ -41,27 +41,20 @@ To discrbe a Service's usage and its lookup behaviour in a client's perspective,
     \caption{Options to configure a ROS Service}
     \label{table:srv-opt}
     \centering
-    \begin{tabular}{rl}
+    \begin{tabular}{l|l|l}
         \hline
-        \bfseries Name & \bfseries Possible values\\
+        \bfseries Name & \bfseries Possible values & \bfseries Meaning \\
         \hline
-        priority  & True, False \\
-        fallback  & True, False, non-empty list of services \\
-        recursive & True, False \\
+        \multirow{2}{*}{priority}  & Local  & use local Nondes first \\
+                                   & Remote & use remote Cells first \\
+        \multirow{3}{*}{fallback}  & True   & allowing fallback \\
+                                   & False  & disallowing fallback \\
+                                   & non-empty list of services & try  \\
+        \multirow{2}{*}{recursive} & True   & apply \\
+                                   & False  & no \\
         \hline
     \end{tabular}
 \end{table} 
-
-\begin{itemize}
-    \item Local, using fallback 
-    \item Remote, 
-\end{itemize}
-
-\begin{itemize}
-    \item True, using fallback 
-    \item False, 
-    \item a non-empty list of Service names, recursively 
-\end{itemize}
 
 \subsubsection{Local Proxy}
 Using the same techique of creating \emph{Daemon}, we created a lightweight proxy of Illuminate, or ROS Master on client side, called \emph{Shadow}.
