@@ -41,17 +41,23 @@ To discrbe a Service's usage and its lookup behaviour in a client's perspective,
     \caption{Options to configure a ROS Service}
     \label{table:srv-opt}
     \centering
-    \begin{tabular}{l|l|l}
+    \begin{tabular}{|l|l|l|}
         \hline
         \bfseries Name & \bfseries Possible values & \bfseries Meaning \\
         \hline
         \multirow{2}{*}{priority}  & Local  & use local Nondes first \\
+        \cline{2-3}
                                    & Remote & use remote Cells first \\
+        \hline
         \multirow{3}{*}{fallback}  & True   & allowing fallback \\
+        \cline{2-3}
                                    & False  & disallowing fallback \\
+        \cline{2-3}
                                    & non-empty list of services & try  \\
-        \multirow{2}{*}{recursive} & True   & apply \\
-                                   & False  & no \\
+        \hline
+        \multirow{2}{*}{recursive} & True   & apply above rules to dependency \\
+        \cline{2-3}
+                                   & False  & do not apply to dependency \\
         \hline
     \end{tabular}
 \end{table} 
