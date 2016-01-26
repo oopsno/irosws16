@@ -1,6 +1,18 @@
 \section{Methods}
 
-Implementing above features, the biggest problem is manitaining multiple active instance of a specified ROS Service at same time.
+To implement above features, the biggest problem is manitaining multiple active instance of a specified ROS Service at same time.
+
+ROS Master does not allow register multiple instance of ROS Service with same \emph{Name}.
+Only the latest registered one is accessable via Master's \emph{lookupService} call.
+
+We extented the original ROS Master to overcome these limitations(Fig.\ref{figure:illuminate}). 
+
+\begin{figure}[h]
+\centering
+\includegraphics{placeholder.1}
+\caption{Architecture of Illuminate}
+\label{figure:illuminate}
+\end{figure}
 
 That is, these instance are not \emph{ROS Nodes} in \emph{ROS Graph}, but \emph{Cells} in containers.
 
@@ -64,7 +76,6 @@ To discrbe a Service's usage and its lookup behaviour in a client's perspective,
 
 \subsubsection{Local Proxy}
 Using the same techique of creating \emph{Daemon}, we created a lightweight proxy of Illuminate, or ROS Master on client side, called \emph{Shadow}.
-
 
 \subsection{Supporting private Nodes}
 Running a variant of ROS Master on each client.
