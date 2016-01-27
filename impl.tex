@@ -31,6 +31,11 @@ The main techique used in tweaking these XML-RPC based APIs is proxying.
 Within this extra intermediate, we intercept interested API calls,
 and route the others to appropriate endpoint (see Table \ref{table:int}).
 
+Generally, we intercept all API about Services so that we can modify the default behaviour of the register,
+unregister and lookup of a Service.
+However, for different componments, interested API can be different (Table \ref{table:int}).
+These implementation related details are discussed in subsections for componment.
+ 
 % TODO fullfill it
 \begin{table}
     \renewcommand{\arraystretch}{1.3}
