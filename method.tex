@@ -49,8 +49,12 @@ and route the others to appropriate endpoint (see Table \ref{table:int}).
     \end{tabular}
 \end{table} 
 
-\subsection{Distributing ROS Service using Docker}
-You can use any kind of technology to manage these containers.
+\subsection{Containerizing ROS Service}
+Both traditional virtualization and containerization(or sandbox) provides enough ablity to distribute any existing ROS Service.
+Comparing with virtualization, containerization brings much less overhead. % TODO detail it
+
+Docker, which is one of the most popular lightweight containerizing solution offically supported by ROS.
+This method is developed mainly based on Docekr, but you can use it atop of many solutions with a tiny adapter. 
 
 \subsection{Managing multiple Nodes with same name}
 \subsubsection{Mapping Container ID to host IP \& port}
