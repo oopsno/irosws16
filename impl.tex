@@ -1,9 +1,30 @@
 \section{Implementation}
 
 \subsection{Overview}
+Our framework consists of 4 componments(Table \ref{table:componments}).
+Each componment is replaceable.
+
+\begin{table}[H]
+    \renewcommand{\arraystretch}{1.3}
+    \caption{Componments of the framework}
+    \label{table:componments}
+    \centering
+    \begin{tabular}{ll}
+        \hline
+        \bfseries Name & \bfseries Purpose \\
+        \hline
+        Illuminate & Extented version of ROS Master \\ 
+        Daemon     & In-container daemon \\
+        Shadow     & Client-side utilities \\
+        Middleman  & Handles address mapping from container to host \\
+        \hline
+    \end{tabular}
+\end{table} 
+
 To implement above features, the biggest problem is manitaining multiple active instance of a specified ROS Service at same time.
 
-ROS Master does not allow register multiple instance of ROS Service with same \emph{Name}.
+ROS Master used a thread-safe dictionary to manitain the name-node mapping,
+not allowing register multiple instance of ROS Service with same name.
 Only the latest registered one is accessable via Master's \emph{lookupService} call.
 
 We extented the original ROS Master to overcome these limitations(Fig.\ref{figure:illuminate}),
@@ -12,11 +33,22 @@ and named this variant as \emph{Illuminate}.
 \begin{figure}[h]
 \centering
 \includegraphics{placeholder.1}
-\caption{Architecture of Illuminate}
+\caption{High-level Architecture}
 \label{figure:illuminate}
 \end{figure}
 
 That is, these instance are not \emph{ROS Nodes} in \emph{ROS Graph}, but \emph{Cells} in containers.
+
+For clients of \emph{Illuminate}, as the only different between Master and Illuminate is that the inner logic to handle Services' register,
+unregister and lookup, the original ROS installation should works as usual without any change.
+
+However, for feature \ref{feature:fallback}, the traditional way of connecting current machine into ROS Graph,
+setting up environment variable \emph{ROS\_MASTER\_API}), cannot help any more.
+That's the direct motivatoin of introducing Shadow.
+Shadow provides client-side support of Feature \ref{feature:mul}, \ref{feature:fallback}. 
+
+Deamon and Middleman are implementation-related componment providing distributing support.
+They watch, control the running of ROS Services, and provide exposed address to Illuminate.
 
 \subsection{Containerizing ROS Service}
 Both traditional virtualization and containerization(or sandbox) provides enough ablity to distribute any existing ROS Service.
