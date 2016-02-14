@@ -115,6 +115,12 @@ They have exactly the same arguments and return value like the Service version.
     \end{tabular}
 \end{table} 
 
+\begin{figure}[h]
+\centering
+\includegraphics{placeholder.1}
+\caption{Architecture of Illuminate}
+\label{figure:illuminate}
+\end{figure}
 
 \subsubsection{Load Balancing}
 Implementing load-balancing algorithms based on \emph{the real payload of each Cell} is overcomplicated.
@@ -122,6 +128,14 @@ Implementing load-balancing algorithms based on \emph{the real payload of each C
 To minimize the modification of original ROS, we decided to use the \emph{LRU} algorithm to detected which cell should be returned for current request, just like \emph{Nginx}'s default behaviour.
 
 \subsection{Daemon and Middleman Details}
+
+\begin{figure}[h]
+\centering
+\includegraphics{placeholder.1}
+\caption{Architecture of Deamon}
+\label{figure:illuminate}
+\end{figure}
+
 \subsubsection{Mapping Container ID to host IP \& port}
 While each independent ROS Service will listen on random port on its initializing process,
 transcendental method would not works any way. 
