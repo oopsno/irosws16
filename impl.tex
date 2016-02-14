@@ -96,6 +96,32 @@ These implementation related details are discussed in subsections for componment
 \end{table} 
 
 \subsection{Illuminate Details}
+llIlluminate kept all functionality of ROS Master, ad extented it with 3 new APIs(Table \ref{table:illuminate-api}).
+They have exactly the same arguments and return value like the Service version.
+
+\begin{table}[H]
+    \renewcommand{\arraystretch}{1.3}
+    \caption{New API in Illuminate}
+    \label{table:illuminate-api}
+    \centering
+    \begin{tabular}{ll}
+        \hline
+        \bfseries Name & \bfseries Purpose \\
+        \hline
+        registerCell & register Cells into registeration manager  \\
+        unregisterCell & unregister Cells from registeration manager \\
+        lookupCell & lookup Cells, not exposed \\
+        \hline
+    \end{tabular}
+\end{table} 
+
+
+\subsubsection{Load Balancing}
+Implementing load-balancing algorithms based on \emph{the real payload of each Cell} is overcomplicated.
+
+To minimize the modification of original ROS, we decided to use the \emph{LRU} algorithm to detected which cell should be returned for current request, just like \emph{Nginx}'s default behaviour.
+
+\subsection{Daemon and Middleman Details}
 \subsubsection{Mapping Container ID to host IP \& port}
 While each independent ROS Service will listen on random port on its initializing process,
 transcendental method would not works any way. 
@@ -110,14 +136,6 @@ So we used a three-stage solution with a extra container running a Key-Value sto
     \item Expose port 30000 for each Cells' container
     \item Redirect income requests from 30000 to listening port of the Service right after its initialization
 \end{enumerate}
-
-\subsubsection{Load Balancing}
-Implementing load-balancing algorithms based on \emph{the real payload of each Cell} is overcomplicated.
-
-To minimize the modification of original ROS, we decided to use the \emph{LRU} algorithm to detected which cell should be returned for current request, just like \emph{Nginx}'s default behaviour.
-
-\subsection{Daemon Details}
-% TODO detail it
 
 \subsection{Shadow Details}
 \subsubsection{Supporting Fallback}
