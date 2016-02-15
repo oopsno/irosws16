@@ -2,13 +2,42 @@
 
 \subsection{Motivation}
 
-\subsection{Purpose}
+There are many existing ROS Services works very well in its specified domain.
+However, original ROS does not allow running multiple Service instances with
+same name at same time. 
+
+ROS client implementation brings with multi-threading support. This works fine
+in samll-scale scenario, but as the ROS Graph grows, multi-threading exposes
+three mainly problem:
+
+\begin{itemize}
+    \item Execution is limited to single physical machine
+    \item No efficient management mechanism
+\end{itemize}
+
+These goes serious as the system payload scales, and causes higher mean response time.
+
+To overcome these shortcommings, and, provide a easy-to-deploy solution with 
+ROS compatibility, we advanced a method to deploy ROS Services on cluster based
+on containerization techique and a series of extensions of ROS Graph's XML-RPC based
+communication.
+
+\subsection{Feature}
+
+Key-points of building this system is
 
 \begin{itemize}
     \item Use the original \emph{ROS Service} as a model to provide remote calculation
     \item Allowing distributed deployment
     \item Provide code-level compatibility
 \end{itemize}
+
+\subsection{Limitation}
+
+As ROS promises Services are singleton, authors focus on original ROS may ignores some
+synchronization mechanisms.
+In containerization environment, each instance of Services runs in independent virtual
+filesystem, so wound not crash, but not synchronized. This may causes undefined behaviours.
 
 \subsection{Problem definition}
 
@@ -19,6 +48,5 @@ Develop a lightweight, code-level compatible, Docker based distributed technolog
     \item Fallback supporting \label{feature:fallback}
     \item ROS compatibility \label{feature:comp}
 \end{enumerate}
-
 
 
