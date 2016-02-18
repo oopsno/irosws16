@@ -1,3 +1,4 @@
+
 \section{Implementation}
 
 \subsection{Overview}
@@ -31,12 +32,11 @@ Only the latest registered one is accessable via Master's \emph{lookupService} c
 
 We extented the original ROS Master to overcome these limitations(Fig.\ref{figure:illuminate}),
 and named this variant as \emph{Illuminate}.
-
-\begin{figure}[h]
+\begin{figure}[!t]
 \centering
-\includegraphics{placeholder.1}
-\caption{Architecture of Illuminate}
-\label{figure:illuminate}
+\includegraphics[width = \figwidth]{figures-1.pdf}
+\caption{Architecture of System}
+\label{figure:aoss}
 \end{figure}
 
 Instances are no longger ordinary \emph{ROS Nodes} in the \emph{ROS Graph},
@@ -64,7 +64,6 @@ Comparing with virtualization, containerization brings much less overhead. % TOD
 Docker, which is one of the most popular lightweight containerizing solution offically supported by ROS.
 This method is developed mainly based on Docekr, but you can use it atop of many solutions with a tiny adapter. 
 
-
 \subsection{Overriding ROS Master API}
 The main techique used in tweaking these XML-RPC based APIs is proxying.
 Within this extra intermediate, we intercept interested API calls,
@@ -79,55 +78,63 @@ These implementation related details are discussed in subsections for componment
 \begin{table}
     \renewcommand{\arraystretch}{1.3}
     \caption{Interested APIs in Different Componment}
-    \label{table:int}
+    \label{table:interested-apis}
     \centering
     \begin{tabular}{|l|l|l|}
         \hline
         \bfseries Componment & \bfseries  API & \bfseries Purpose \\
         \hline
-        \multirow{2}{*}{Illuminate}  & lookupService & lookup for Cells if no appropriate Node are found \\
-        \cline{2-3}
-                                     & Remote & use remote Cells first \\
+        \multirow{1}{*}{Illuminate} & lookupService & lookup Cells if no appropriate Node are found \\
         \hline
-        \multirow{3}{*}{Daemon}      & True   & allowing fallback \\
-        \cline{2-3}
-                                     & False  & disallowing fallback \\
-        \cline{2-3}
-                                     & non-empty list of services & try  \\
+        \multirow{6}{*}{Daemon} & registerService & expose a Service to Illuminate\\
+        \cline{2-3} & unregisterService & unregister current Cell \\
+        \cline{2-3} & registerPublisher & \multirow{4}{*}{Simply intercept them} \\
+        \cline{2-2} & registerSubscriber    &  \\
+        \cline{2-2} & unregisterPublisher   &  \\
+        \cline{2-2} & unregisterSubscriber  &  \\
         \hline
-        \multirow{2}{*}{Shadow} & True   & apply above rules to dependency \\
-        \cline{2-3}
-                                     & False  & do not apply to dependency \\
+        \multirow{1}{*}{Shadow} & lookupService & apply above rules to dependency \\
         \hline
     \end{tabular}
 \end{table} 
 
 \subsection{Illuminate Details}
-llIlluminate kept all functionality of ROS Master, ad extented it with 3 new APIs(Table \ref{table:illuminate-api}).
-They have exactly the same arguments and return value like the Service version.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width = \figwidth]{figures-3.pdf}
+\caption{Architecture of Illuminate}
+\label{figure:aoil}
+\end{figure}
+
+Illuminate creates a namespace to maintain all the Cells independent of
+original ROS Services.
+
+To maximum the compatiblity, Cells have lower priority than Services.
+
+Illuminate owns all functionality of ROS Master,
+extented it with 3 new APIs(Table \ref{table:illuminate-api}),
+and adjusts the \emph{lookupService} function's logic.
+
+All the 3 new APIs have exactly the same arguments and
+return value like the Service version (Table \ref{table:illuminate-api}).
 
 \begin{table}[H]
-    \renewcommand{\arraystretch}{1.3}
-    \caption{New API in Illuminate}
-    \label{table:illuminate-api}
-    \centering
-    \begin{tabular}{ll}
-        \hline
-        \bfseries Name & \bfseries Purpose \\
-        \hline
-        registerCell & register Cells into registeration manager  \\
-        unregisterCell & unregister Cells from registeration manager \\
-        lookupCell & lookup Cells, not exposed \\
-        \hline
-    \end{tabular}
+  \caption{New API in Illuminate}
+  \label{table:illuminate-api}
+  \centering
+  \begin{tabular}{ll}
+    \hline
+    \bfseries Name & \bfseries Purpose \\
+    \hline
+    registerCell   & register Cells into registeration manager  \\
+    unregisterCell & unregister Cells from registeration manager \\
+    lookupCell     & lookup Cells, not exposed \\
+    \hline
+  \end{tabular}
 \end{table} 
 
-\begin{figure}[h]
-\centering
-\includegraphics{placeholder.1}
-\caption{Architecture of Illuminate}
-\label{figure:illuminate}
-\end{figure}
+
 
 \subsubsection{Load Balancing}
 Implementing load-balancing algorithms based on \emph{the real payload of each Cell} is overcomplicated.
@@ -136,16 +143,45 @@ To minimize the modification of original ROS, we decided to use the \emph{LRU} a
 
 \subsection{Daemon and Middleman Details}
 
-\begin{figure}[h]
+\begin{figure}[!t]
 \centering
-\includegraphics{placeholder.1}
-\caption{Architecture of Deamon}
-\label{figure:illuminate}
+\includegraphics[width = \figwidth]{figures-5.pdf}
+\caption{Architecture of Deamon and Middleman}
+\label{figure:aodm}
 \end{figure}
 
-\subsubsection{Mapping Container ID to host IP \& port}
-While each independent ROS Service will listen on random port on its initializing process,
-transcendental method would not works any way. 
+Deamon runs on each active container.
+Its mainly function is handling the (un)register requests.
+\begin{table}[H]
+  \renewcommand{\arraystretch}{1.3}
+  \caption{Deamon's behaviour}
+  \label{table:demans-behaviour}
+  \centering
+  \begin{tabular}{|l|l|l|}
+     \hline
+     \bfseries \# & \bfseries API & \bfseries Behaviour \\
+     \hline
+     1 & registerService & expose current Service to Illuminate\\
+     \hline
+     2 & unregisterService & unregister current Service instance \\
+     \hline
+     3 & registerPublisher & \multirow{4}{*}{Simply intercept them} \\
+     \cline{1-2}
+     4 & registerSubscriber    &  \\
+     \cline{1-2}
+     5 & unregisterPublisher   &  \\
+     \cline{1-2}
+     6 & unregisterSubscriber  &  \\
+     \hline
+     7 & all the others & transmit to Illuminate \\
+     \hline
+  \end{tabular}
+\end{table}
+
+Outside container, Middleman handles container IP - host port mapping.
+
+While each independent ROS Service will listen on random port on its
+initializing process, transcendental method would not works any way. 
 
 Current Docker releases has not included an introspect mechanism.
 
@@ -159,11 +195,43 @@ So we used a three-stage solution with a extra container running a Key-Value sto
 \end{enumerate}
 
 \subsection{Shadow Details}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width = \figwidth]{figures-7.pdf}
+\caption{Architecture of Shadow}
+\label{figure:aosh}
+\end{figure}
+
+Finally, robots need clinet-side infrastructure to access Cells,
+the Illuminate managed, independent namespace.
+
+For different use cases, both original and customized client programs works.
+
+\begin{table}
+  \caption{ROS Compatiblity}
+  \label{table:shadow-compatible}
+  \centering
+  \begin{tabular}{ll}
+    \hline
+    \bfseries Feature & \bfseries Origin ROS Compatiblity \\
+    \hline
+    Access Cells  & Yes  \\
+    Configuration & No   \\
+    Fallback      & No   \\
+    \hline
+  \end{tabular}
+\end{table} 
+
+\subsubsection{Accessing Cells}
+As Services have higher priority than Cells, the `lookupService`
+
 \subsubsection{Supporting Fallback}
-Configuration on how does one node works. 
 
 \subsubsection{Configuration}
-To discrbe a Service's usage and its lookup behaviour in a client's perspective, we defined 3 properties, priority, fallback and recursive(see table \ref{table:srv-opt}).
+To discrbe a Service's usage and its lookup behaviour in
+a client's perspective, we defined 3 properties, priority,
+fallback and recursive(see table \ref{table:srv-opt}).
 
 \begin{table}
   \renewcommand{\arraystretch}{1.3}
@@ -196,6 +264,12 @@ Using the same techique of creating \emph{Daemon}, we created a lightweight
 proxy of Illuminate, or ROS Master on client side, called \emph{Shadow}.
 
 \subsubsection{Supporting private Nodes}
-Running a variant of ROS Master on each client.
+Just like Deamon intercept some register actions to keep only the Service itself is
+correctly expose to Illuminate, Shadow intercepts all these requests and process them
+on client-side.
+
+When a package is directly or recursively marked as private, Shadows' lookup 
+process only checks local Services, and all the (un)register is processed locally.
+
 
 

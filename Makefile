@@ -1,11 +1,8 @@
 pdf: metapost
-	latex workshop.tex
-	dvipdfmx workshop.dvi
+	pdflatex workshop.tex
 
-metapost: *.1
-
-*.1: *.mp
-	mpost $^
+metapost: figures.mp 
+	mptopdf $^
 
 .PHONY: clean
 
