@@ -84,16 +84,16 @@ These implementation related details are discussed in subsections for componment
         \hline
         \bfseries Componment & \bfseries  API & \bfseries Purpose \\
         \hline
-        \multirow{1}{*}{Illuminate} & lookupService & lookup Cells if no appropriate Node are found \\
+        \multirow{1}{*}{Illuminate} & lookupService & generalized lookup \\
         \hline
-        \multirow{6}{*}{Daemon} & registerService & expose a Service to Illuminate\\
+        \multirow{6}{*}{Daemon} & registerService & expose a Cell to Illuminate\\
         \cline{2-3} & unregisterService & unregister current Cell \\
         \cline{2-3} & registerPublisher & \multirow{4}{*}{Simply intercept them} \\
         \cline{2-2} & registerSubscriber    &  \\
         \cline{2-2} & unregisterPublisher   &  \\
         \cline{2-2} & unregisterSubscriber  &  \\
         \hline
-        \multirow{1}{*}{Shadow} & lookupService & apply above rules to dependency \\
+        \multirow{1}{*}{Shadow} & lookupService & generalized lookup \\
         \hline
     \end{tabular}
 \end{table} 
