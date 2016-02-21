@@ -1,10 +1,11 @@
-
 \section{Implementation}
 
 \subsection{Overview}
 
-Our framework consists of 4 componments(Table \ref{table:componments}).
-Each componment is designed to be replaceable.
+Our framework consists of 4 components (Table \ref{table:componments}),
+Each of those componment is designed to be replaceable, and they interact with
+other components(Fig.\ref{figure:aoss}) with XML-RPC based protocol exactly as
+what ROS does.
 
 \begin{table}[H]
   \renewcommand{\arraystretch}{1.3}
@@ -27,15 +28,17 @@ To implement above features, the biggest problem is manitaining multiple active
 instance of a specified ROS Service at same time.
 
 ROS Master used a thread-safe dictionary to manitain the name-node mapping,
-not allowing register multiple instance of ROS Service with same name.
-Only the latest registered one is accessable via Master's \emph{lookupService} call.
+which does not allowing register multiple instance of ROS Service with same name.
+Whenever a name crash occurs, only the latest registered instance is
+accessable via Master's \emph{lookupService} API call.
 
-We extented the original ROS Master to overcome these limitations(Fig.\ref{figure:illuminate}),
-and named this variant as \emph{Illuminate}.
+We extented the original ROS Master to overcome this
+limitation(Fig.\ref{figure:aoil}), and named this variant as \emph{Illuminate}.
+
 \begin{figure}[!t]
 \centering
 \includegraphics[width = \figwidth]{figures-1.pdf}
-\caption{Architecture of System}
+\caption{Interaction Between Componments}
 \label{figure:aoss}
 \end{figure}
 
@@ -46,35 +49,34 @@ For clients of \emph{Illuminate}, as the only different between \emph{Master} an
 is that the latter's Service register handling logic treats name crashes as normal requests, 
 and built with load-balancing support.
 
-While staying the protocol not modified, the original cline-side ROS installations just work as
-usual without any extra configuration or modification.
+While staying the protocol not modified, the original cline-side ROS
+installations just work as usual without any extra configuration or modification.
 
 However, for feature \ref{feature:fallback}, the traditional way of connecting current machine into ROS Graph,
 setting up environment variable \emph{ROS\_MASTER\_API}), cannot help any more.
-That's the direct motivatoin of introducing Shadow.
+That's the direct motivatoin of introducing \emph{Shadow}.
 Shadow provides client-side support of Feature \ref{feature:mul}, \ref{feature:fallback}. 
 
-Deamon and Middleman are implementation-related componment providing distributing support.
+\emph{Deamon} and \emph{Middleman} are implementation-related componment providing distributing support.
 They watch, control the running of ROS Services, and provide exposed address to Illuminate.
 
 \subsection{Containerizing ROS Service}
 Both traditional virtualization and containerization(or sandbox) provides enough ablity to distribute any existing ROS Service.
-Comparing with virtualization, containerization brings much less overhead. % TODO detail it
+Comparing with virtualization, containerization brings much less overhead.
 
 Docker, which is one of the most popular lightweight containerizing solution offically supported by ROS.
-This method is developed mainly based on Docekr, but you can use it atop of many solutions with a tiny adapter. 
+This method is developed mainly based on Docker, but you can use it atop of many solutions with a tiny adapter. 
 
 \subsection{Overriding ROS Master API}
 The main techique used in tweaking these XML-RPC based APIs is proxying.
 Within this extra intermediate, we intercept interested API calls,
 and route the others to appropriate endpoint (see Table \ref{table:int}).
 
-Generally, we intercept all API about Services so that we can modify the default behaviour of the register,
+Generally, we intercept all API about Services so that we can modify the default behavior of the register,
 unregister and lookup of a Service.
 However, for different componments, interested API can be different (Table \ref{table:int}).
 These implementation related details are discussed in subsections for componment.
  
-% TODO fullfill it
 \begin{table}
     \renewcommand{\arraystretch}{1.3}
     \caption{Interested APIs in Different Componment}
@@ -135,11 +137,29 @@ return value like the Service version (Table \ref{table:illuminate-api}).
 \end{table} 
 
 
+\subsubsection{Routines}
+There're totally 3 possible execute routines for each valid API call.
+
+\paragraph{Service Lookup}
+Service lookup shares same logic with both client-side and daemon-side requests.
+Like the red pathes shown in Fig.\ref{figure:aoil}, Illuminate will first try 
+to find a appropriate service. If none of global services matches, 
+Illuminate try to find a appropriate Cell.
+If nothing found again, respond a failure as final response.
+ 
+\paragraph{Cells}
+Like the blue pathes shown in Fig.\ref{figure:aoil}, explicit Cell operations
+are directly handled by Illuminate.
+
+\paragraph{Non-interested API Calls}
+Like the red pathes shown in Fig.\ref{figure:aoil},
+Illuminate simply transmit non-interested to embeded Master code.
 
 \subsubsection{Load Balancing}
 Implementing load-balancing algorithms based on \emph{the real payload of each Cell} is overcomplicated.
 
-To minimize the modification of original ROS, we decided to use the \emph{LRU} algorithm to detected which cell should be returned for current request, just like \emph{Nginx}'s default behaviour.
+To minimize the modification of original ROS, we decided to use the \emph{LRU} algorithm to detected which cell should be returned for current request, just like \emph{Nginx}'s default behavior.
+
 
 \subsection{Daemon and Middleman Details}
 
@@ -151,11 +171,11 @@ To minimize the modification of original ROS, we decided to use the \emph{LRU} a
 \end{figure}
 
 Deamon runs on each active container.
-Its mainly function is handling the (un)register requests.
+Its mainly function is handling Cells (un)register requests.
 \begin{table}[H]
   \renewcommand{\arraystretch}{1.3}
-  \caption{Deamon's behaviour}
-  \label{table:demans-behaviour}
+  \caption{Deamon's behavior}
+  \label{table:demans-behavior}
   \centering
   \begin{tabular}{|l|l|l|}
      \hline
@@ -182,9 +202,11 @@ Outside container, Middleman handles container IP - host port mapping.
 
 While each independent ROS Service will listen on random port on its
 initializing process, transcendental method would not works any way. 
+So we tweaked it a bit in each container.
+Just like shown in Fig.\ref{figure:aomd}, we mapped this random port to
+port 30000 using iptables, and expose port 30000 to Docker Hosts.
 
-Current Docker releases has not included an introspect mechanism.
-
+Notice that, current Docker releases has not included an introspect mechanism.
 Engage the access from inside the Container to host is not a secure practice.
 
 So we used a three-stage solution with a extra container running a Key-Value storage componment(Radis for this case).
@@ -193,6 +215,25 @@ So we used a three-stage solution with a extra container running a Key-Value sto
     \item Expose port 30000 for each Cells' container
     \item Redirect income requests from 30000 to listening port of the Service right after its initialization
 \end{enumerate}
+
+\subsubsection{Routines}
+\paragraph{Launch}
+For each Service in container, all the requests will be sent to Deamon,
+which is shown in Fig.\ref{figure:aomd} (a).
+For \emph{registerService} API calls, Deamon modifys the iptable rules to
+map the current launching Service's listening port to port 30000 of the container.
+Then, a query request is sent to Middleman, as action (b).
+
+\paragraph{Address Reassembling}
+Middleman requires the containers information from Docker (c),
+pick the binded port, and host's IP, assemble an accessable address and
+return to Daemon. 
+
+\paragraph{Register}
+In action (d), the reassembled address will replace the Servic emitted one,
+and sent to Illuminate.
+The Service is finally launched and registered. API calls besides
+\emph{lookupService} is processed as list in TABLE \ref{table:int}.
 
 \subsection{Shadow Details}
 
@@ -204,32 +245,57 @@ So we used a three-stage solution with a extra container running a Key-Value sto
 \end{figure}
 
 Finally, robots need clinet-side infrastructure to access Cells,
-the Illuminate managed, independent namespace.
+in the Illuminate managed, independent namespace.
 
-For different use cases, both original and customized client programs works.
+Using the same techique of creating \emph{Daemon}, we created a lightweight
+proxy of Illuminate, or ROS Master on client side, called \emph{Shadow}.
+
+For different use cases, both original and customized client programs
+works(TABLE \ref{table:shadow-compatible}).
 
 \begin{table}
-  \caption{ROS Compatiblity}
+  \caption{Client-side ROS Compatiblity}
   \label{table:shadow-compatible}
   \centering
   \begin{tabular}{ll}
     \hline
     \bfseries Feature & \bfseries Origin ROS Compatiblity \\
     \hline
-    Access Cells  & Yes  \\
-    Configuration & No   \\
-    Fallback      & No   \\
+    Access Cells    & Yes \\
+    Private Service & No  \\
+    Fallback        & No  \\
     \hline
   \end{tabular}
 \end{table} 
 
 \subsubsection{Accessing Cells}
-As Services have higher priority than Cells, the `lookupService`
+As Services have higher priority than Cells, the \emph{lookupService} will
+work, with or with out Shadow.
+
+In Fig.\ref{figure:aosh}, lookuping private Service is marked as routine \emph{ab},
+lookuping Cells or Services on the ROS Graph is marked as routine \emph{ac}.
+Particular combination of routines used in a single request is decided by
+associated packages' configuration.
+ 
+\subsubsection{Supporting private Nodes}
+Just like Deamon intercept some register actions to keep only the Service itself is
+correctly expose to Illuminate, Shadow intercepts all these requests and process them
+on client-side, as routine \emph{de}.
+
+If not explicitly specified, a Service is registered as public one,
+to keep compatible with the original ROS's behaviors(routine \emph{df}).
 
 \subsubsection{Supporting Fallback}
+Fallback only matters which combination of lookup actions will be used.
+
+When a package is directly or recursively marked as private, Shadows' lookup 
+process only checks local Services, and all the (un)register is processed locally.
+
+All the APIs besides \emph{lookupService} will be transmit to Illuminate, 
+as routine \emph{gh}.
 
 \subsubsection{Configuration}
-To discrbe a Service's usage and its lookup behaviour in
+To discrbe a Service's usage and its lookup behavior in
 a client's perspective, we defined 3 properties, priority,
 fallback and recursive(see table \ref{table:srv-opt}).
 
@@ -259,17 +325,4 @@ fallback and recursive(see table \ref{table:srv-opt}).
   \end{tabular}
 \end{table} 
 
-\subsubsection{Local Proxy}
-Using the same techique of creating \emph{Daemon}, we created a lightweight
-proxy of Illuminate, or ROS Master on client side, called \emph{Shadow}.
-
-\subsubsection{Supporting private Nodes}
-Just like Deamon intercept some register actions to keep only the Service itself is
-correctly expose to Illuminate, Shadow intercepts all these requests and process them
-on client-side.
-
-When a package is directly or recursively marked as private, Shadows' lookup 
-process only checks local Services, and all the (un)register is processed locally.
-
-
-
+Both JSON or YAML is accpted.
