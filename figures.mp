@@ -50,12 +50,12 @@ beginfig(1);
     boxjoin(a.c = b.c + (0, 30));
     boxit.mid(btex Middleman etex);
     illumint.c = origin;
-    mid.c = daemon.c + (0, 30);
+    mid.c = daemon.c + (0, 40);
     drawboxed(shadow, illumint, daemon, mid);
     % Logic
     label.top(btex(a)etex, dcuta(shadow, illumint) shadow.e .. illumint.w);
     label.top(btex(b)etex, dcuta(illumint, daemon) illumint.e .. daemon.w);
-    label.urt(btex(c)etex, dcuta(daemon, mid) daemon.n .. mid.s);
+    label.rt(btex(c)etex, dcuta(daemon, mid) daemon.n .. mid.s);
 endfig;
 
 % Illumint
