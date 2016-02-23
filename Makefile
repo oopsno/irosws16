@@ -1,5 +1,8 @@
 pdf: metapost
 	pdflatex workshop.tex
+	bibtex   workshop
+	pdflatex workshop.tex
+	pdflatex workshop.tex
 
 metapost: figures.mp 
 	mptopdf $^

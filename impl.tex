@@ -70,7 +70,7 @@ This method is developed mainly based on Docker, but you can use it atop of many
 \subsection{Overriding ROS Master API}
 The main techique used in tweaking these XML-RPC based APIs is proxying.
 Within this extra intermediate, we intercept interested API calls,
-and route the others to appropriate endpoint (see Table \ref{table:int}).
+and route the others to appropriate endpoint (see TABLE \ref{table:interested-apis}).
 
 Generally, we intercept all API about Services so that we can modify the default behavior of the register,
 unregister and lookup of a Service.
@@ -203,7 +203,7 @@ Outside container, Middleman handles container IP - host port mapping.
 While each independent ROS Service will listen on random port on its
 initializing process, transcendental method would not works any way. 
 So we tweaked it a bit in each container.
-Just like shown in Fig.\ref{figure:aomd}, we mapped this random port to
+Just like shown in Fig.\ref{figure:aodm}, we mapped this random port to
 port 30000 using iptables, and expose port 30000 to Docker Hosts.
 
 Notice that, current Docker releases has not included an introspect mechanism.
@@ -211,7 +211,7 @@ Engage the access from inside the Container to host is not a secure practice.
 
 So we used a three-stage solution with a extra container running a Key-Value storage componment(Radis for this case).
 \begin{enumerate}
-    \item Register the mapped port to K-V storage right after container was created.
+    \item Register the mapped port to Key-Value storage right after container was created.
     \item Expose port 30000 for each Cells' container
     \item Redirect income requests from 30000 to listening port of the Service right after its initialization
 \end{enumerate}
@@ -219,7 +219,7 @@ So we used a three-stage solution with a extra container running a Key-Value sto
 \subsubsection{Routines}
 \paragraph{Launch}
 For each Service in container, all the requests will be sent to Deamon,
-which is shown in Fig.\ref{figure:aomd} (a).
+which is shown in Fig.\ref{figure:aodm} (a).
 For \emph{registerService} API calls, Deamon modifys the iptable rules to
 map the current launching Service's listening port to port 30000 of the container.
 Then, a query request is sent to Middleman, as action (b).
@@ -233,7 +233,7 @@ return to Daemon.
 In action (d), the reassembled address will replace the Servic emitted one,
 and sent to Illuminate.
 The Service is finally launched and registered. API calls besides
-\emph{lookupService} is processed as list in TABLE \ref{table:int}.
+\emph{lookupService} is processed as list in TABLE \ref{table:interested-apis}.
 
 \subsection{Shadow Details}
 
