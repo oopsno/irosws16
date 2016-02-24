@@ -44,13 +44,13 @@ beginfig(1);
     % Components
     boxjoin(a.ne=b.nw - (30, 0) ; a.se=b.sw - (30, 0));
     boxit.shadow(btex Shadow etex);
-    boxit.illumint(btex Illumint etex);
+    boxit.illumint(btex Illuminate etex);
     boxit.daemon(btex Daemon etex);
 
     boxjoin(a.c = b.c + (0, 30));
     boxit.mid(btex Middleman etex);
     illumint.c = origin;
-    mid.c = daemon.c + (0, 40);
+    mid.c = daemon.c + (0, 50);
     drawboxed(shadow, illumint, daemon, mid);
     % Logic
     label.top(btex(a)etex, dcuta(shadow, illumint) shadow.e .. illumint.w);
@@ -114,12 +114,18 @@ beginfig(3);
 
     % Daemon-side access
     boxjoin(a.sw=b.nw; a.se=b.ne);
+    boxit.vdots3(btex $\cdots$ etex);
     boxit.regc(btex registerCell etex);
     boxit.unregc(btex unregisterCell etex);
-    regc.c = illumint.c + (100, 0);
-    drawboxed(regc, unregc);
+    boxit.vdots4(btex $\cdots$ etex);
+    boxit.other1(btex other APIs etex);
+    boxit.vdots5(btex $\cdots$ etex);
+    regc.c = illumint.c + (150, 0);
+    xpart regc.e - xpart regc.w = 80;
+    drawboxed(vdots3, regc, unregc, vdots4, other1, vdots5);
 
     % Logic
+    color cyan; cyan := (102/255, 204/255, 255/255);
     drawarrow other.e{dir0}..{dir0}illumint.w withcolor red;
     drawarrow illumint.n{dir60}..{dir120}master.s withcolor red;
     drawarrow lksrv.e{dir0}..{dir0}illumint.w withcolor green;
@@ -128,8 +134,11 @@ beginfig(3);
     drawarrow regc.w{dir180}..{dir180}illumint.e withcolor blue;
     drawarrow unregc.w{dir180}..{dir180}illumint.e withcolor blue;
     drawarrow illumint.s{dir-60}..{dir-120}c1.n withcolor blue;
+    drawarrow other1.w--illumint.e withcolor cyan;
+    drawarrow illumint.n{dir99}..{dir90}master.s withcolor cyan;
     % Labels
     label.top(btex Client side API calls etex, vdots0.n);
+    label.top(btex Inner-container API calls etex, vdots3.n);
 endfig;
 
 % Daemon and Middleman
